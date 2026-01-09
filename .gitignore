@@ -17,6 +17,7 @@ yarn-error.log*
 dist/          # If you use a build step (like TypeScript)
 build/         # Alternative build folder
 .coverage/     # Test coverage output
+public/uploads/
 
 # 4. IDE & EDITOR FILES
 .vscode/
@@ -26,7 +27,6 @@ build/         # Alternative build folder
 *~
 
 # 5. DOCKER IGNORES (IMPORTANT FOR DOCKER USERS)
-# Ignore any Docker Compose override files used for local development
 docker-compose.yml
 # It's common to ignore Dockerfile.xyz variants if you have a main one committed
 # .Dockerfile*
