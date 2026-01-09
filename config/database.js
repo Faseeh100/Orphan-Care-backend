@@ -28,40 +28,27 @@
 
 
 const { Sequelize } = require('sequelize');
-require('dotenv').config();
 
-// Determine the correct connection string
-let connectionString;
+let sequelize;
+
 if (process.env.NODE_ENV === 'production') {
-  // 1. Vercel provides POSTGRES_URL, NOT DATABASE_URL
-  connectionString = process.env.POSTGRES_URL;
-  console.log('Production: Using POSTGRES_URL from Vercel');
+  // Use the direct connection URL provided by the Vercel-Supabase integration
+  sequelize = new Sequelize(process.env.POSTGRES_URL_NON_POOLING, {
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false // This is crucial for Supabase's SSL
+      }
+    },
+    logging: false // Optional: keeps Vercel logs clean
+  });
 } else {
-  // 2. Local development uses DATABASE_URL
-  connectionString = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/orphan_care';
-  console.log('Development: Using DATABASE_URL');
+  // For local development, keep using your local .env variable
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    logging: console.log // Optional: helps with local debugging
+  });
 }
-
-const sequelize = new Sequelize(connectionString, {
-  dialect: 'postgres',
-  logging: process.env.NODE_ENV === 'development' ? console.log : false,
-  dialectOptions: {
-    ssl: process.env.NODE_ENV === 'production' ? {
-      require: true,
-      rejectUnauthorized: false
-    } : false
-  },
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000
-  }
-});
-
-// Test the connection
-sequelize.authenticate()
-  .then(() => console.log('✅ PostgreSQL connected via Sequelize'))
-  .catch(err => console.error('❌ Unable to connect to PostgreSQL:', err));
 
 module.exports = sequelize;
